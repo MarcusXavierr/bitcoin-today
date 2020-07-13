@@ -10,7 +10,7 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
-  String selectedCurrency = 'AUD';
+  String selectedCurrency = currenciesList[0];
 
   List prices = [];
 
@@ -18,8 +18,24 @@ class _PriceScreenState extends State<PriceScreen> {
   String ethereum = '?';
   String litecoin = '?';
   CoinData coinData = CoinData();
-  //Dropdown Button
 
+  // ! Make all the requests
+  void requests() async {
+    String btc = await coinData.getBitcoinPrice(selectedCurrency);
+    setState(() {
+      bitcoin = btc;
+    });
+    btc = await coinData.getEthereumPrice(selectedCurrency);
+    setState(() {
+      ethereum = btc;
+    });
+    btc = await coinData.getLitecoinPrice(selectedCurrency);
+    setState(() {
+      litecoin = btc;
+    });
+  }
+
+  // * Dropdown Button
   DropdownButton androidDropdown() {
     return DropdownButton<String>(
       value: selectedCurrency,
@@ -33,7 +49,7 @@ class _PriceScreenState extends State<PriceScreen> {
     );
   }
 
-  //Dropdown loop
+  // * Dropdown loop
   List<DropdownMenuItem<String>> createDropdown() {
     List<DropdownMenuItem<String>> dropdownItens = [];
 
@@ -49,7 +65,7 @@ class _PriceScreenState extends State<PriceScreen> {
     return dropdownItens;
   }
 
-  //Cupertino Picker
+  // * Cupertino Picker
 
   CupertinoPicker iosPicker() {
     return CupertinoPicker(
@@ -66,7 +82,7 @@ class _PriceScreenState extends State<PriceScreen> {
     );
   }
 
-  //Cupertino Loop
+  // * Cupertino Loop
   List<Text> cupertinoPickerItems() {
     List<Text> pickerItem = [];
 
@@ -121,14 +137,7 @@ class _PriceScreenState extends State<PriceScreen> {
                 price: litecoin,
               ),
               GestureDetector(
-                onTap: () async {
-                  prices = await coinData.getPrice(selectedCurrency);
-                  setState(() {
-                    bitcoin = prices[0];
-                    ethereum = prices[1];
-                    litecoin = prices[2];
-                  });
-                },
+                onTap: () => requests(),
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
                   child: Card(
