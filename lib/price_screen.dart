@@ -10,8 +10,14 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
-  String selectedCurrency = 'USD';
+  String selectedCurrency = 'AUD';
 
+  List prices = [];
+
+  String bitcoin = '?';
+  String ethereum = '?';
+  String litecoin = '?';
+  CoinData coinData = CoinData();
   //Dropdown Button
 
   DropdownButton androidDropdown() {
@@ -49,8 +55,12 @@ class _PriceScreenState extends State<PriceScreen> {
     return CupertinoPicker(
       itemExtent: 32.0,
       onSelectedItemChanged: (selectedIndex) {
-        print(currenciesList[selectedIndex]);
-        selectedCurrency = currenciesList[selectedIndex];
+        setState(() {
+          selectedCurrency = currenciesList[selectedIndex];
+          bitcoin = '?';
+          ethereum = '?';
+          litecoin = '?';
+        });
       },
       children: cupertinoPickerItems(),
     );
@@ -97,15 +107,28 @@ class _PriceScreenState extends State<PriceScreen> {
             children: <Widget>[
               CoinWidget(
                 coinType: 'BTC',
-              ),
-              CoinWidget(
-                coinType: 'UTC',
+                currency: selectedCurrency,
+                price: bitcoin,
               ),
               CoinWidget(
                 coinType: 'ETH',
+                currency: selectedCurrency,
+                price: ethereum,
+              ),
+              CoinWidget(
+                coinType: 'LTC',
+                currency: selectedCurrency,
+                price: litecoin,
               ),
               GestureDetector(
-                onTap: () => print('Works'),
+                onTap: () async {
+                  prices = await coinData.getPrice(selectedCurrency);
+                  setState(() {
+                    bitcoin = prices[0];
+                    ethereum = prices[1];
+                    litecoin = prices[2];
+                  });
+                },
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
                   child: Card(
@@ -149,9 +172,11 @@ class _PriceScreenState extends State<PriceScreen> {
 }
 
 class CoinWidget extends StatelessWidget {
-  CoinWidget({this.coinType});
+  CoinWidget({this.coinType, this.currency, this.price});
 
   final String coinType;
+  final String currency;
+  final String price;
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +193,7 @@ class CoinWidget extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
               child: Text(
-                '1 BTC = ? USD',
+                '1 $coinType = $price $currency',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 20.0,
